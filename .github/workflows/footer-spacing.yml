@@ -1,0 +1,32 @@
+name: Improve footer spacing
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add footer spacing
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = '</style>'
+          css = '''footer span{display:inline-block;margin:0 22px} @media(max-width:800px){footer span{display:block;margin:7px 0}}'''
+          if css not in s:
+              s = s.replace(marker, css + marker, 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Improve footer spacing and mobile layout'
+          git push
